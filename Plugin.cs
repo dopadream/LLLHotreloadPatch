@@ -9,7 +9,7 @@ namespace LLLHotreloadPatch
     [BepInDependency("imabatby.lethallevelloader", BepInDependency.DependencyFlags.HardDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "dopadream.lethalcompany.LLLHotreloadPatch", PLUGIN_NAME = "LLLHotreloadPatch", PLUGIN_VERSION = "1.0.0";
+        const string PLUGIN_GUID = "dopadream.lethalcompany.LLLHotreloadPatch", PLUGIN_NAME = "LLLHotreloadPatch", PLUGIN_VERSION = "1.0.1";
         internal static new ManualLogSource Logger;
 
         void Awake()
@@ -44,14 +44,26 @@ namespace LLLHotreloadPatch
         [HarmonyPostfix]
         static void JoinOrStartLobbyPostfix()
         {
-            Plugin.Logger.LogDebug($"whatever currentClientId is: {NetworkManager.Singleton.LocalClientId}");
-            Plugin.Logger.LogDebug($"AssetBundleInfos count: {LethalLevelLoader.AssetBundles.AssetBundleLoader.instance.AssetBundleInfos.Count})");
+            Plugin.Logger.LogInfo($"whatever currentClientId is: {NetworkManager.Singleton.LocalClientId}");
+            Plugin.Logger.LogInfo($"Current moon's scene name: {RoundManager.Instance.currentLevel.sceneName}");
+            Plugin.Logger.LogInfo($"AssetBundleInfos count: {LethalLevelLoader.AssetBundles.AssetBundleLoader.instance.AssetBundleInfos.Count})");
             foreach (var assetBundleInfo in LethalLevelLoader.AssetBundles.AssetBundleLoader.instance.AssetBundleInfos)
             {
-                Plugin.Logger.LogDebug($"AssetBundleInfo: {assetBundleInfo}");
-                Plugin.Logger.LogDebug($"AssetBundle: {assetBundleInfo.assetBundle}");
-                Plugin.Logger.LogDebug($"Active Loading Status: {assetBundleInfo.ActiveLoadingStatus}");
+                if (assetBundleInfo.assetBundle != null)
+                {
+                    Plugin.Logger.LogDebug($"AssetBundle: {assetBundleInfo.assetBundle}");
+                }
+                if (!assetBundleInfo.sceneNames.Contains(RoundManager.Instance.currentLevel.sceneName)) continue;
+                Plugin.Logger.LogDebug($"I'm loading this bundle!");
                 assetBundleInfo.TryLoadBundle();
+                /*foreach (string sceneName in assetBundleInfo.sceneNames)
+                {
+                    Plugin.Logger.LogInfo($"Bundle contains this scene: {sceneName}");
+                    if (sceneName.ToLowerInvariant != RoundManager.Instance.currentLevel.sceneName.ToLowerInvariant) continue;
+                    Plugin.Logger.LogInfo($"I'm loading this bundle!");
+                    assetBundleInfo.TryLoadBundle();
+                    break;
+                }*/
             }
         }
     }
